@@ -1,7 +1,6 @@
 ﻿using Core.Data;
 using Core.Helpers;
 using Core.Services;
-using Markdig;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -57,8 +56,8 @@ namespace Core.Api
                 {
                     foreach (var p in results)
                     {
-                        p.Description = Markdown.ToHtml(p.Description);
-                        p.Content = Markdown.ToHtml(p.Content);
+                        p.Description = p.Description.MdToHtml();
+                        p.Content = p.Content.MdToHtml();
                     }
                 }
 
@@ -101,8 +100,8 @@ namespace Core.Api
                 {
                     foreach (var p in results)
                     {
-                        p.Description = Markdown.ToHtml(p.Description);
-                        p.Content = Markdown.ToHtml(p.Content);
+                        p.Description = p.Description.MdToHtml();
+                        p.Content = p.Content.MdToHtml();
                     }
                 }
 
@@ -112,6 +111,17 @@ namespace Core.Api
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
+        }
+
+        /// <summary>
+        /// Get blog categories (CORS enabled)
+        /// </summary>
+        /// <returns>List of all blog categories</returns>
+        [HttpGet("categories")]
+        [EnableCors("AllowOrigin")]
+        public async Task<IEnumerable<CategoryItem>> Categories()
+        {
+            return await _data.BlogPosts.Categories();
         }
 
         /// <summary>
@@ -129,8 +139,8 @@ namespace Core.Api
                 var post = await _data.BlogPosts.GetItem(p => p.Id == id, !User.Identity.IsAuthenticated);
                 if (format.ToUpper() == "HTML")
                 {
-                    post.Description = Markdown.ToHtml(post.Description);
-                    post.Content = Markdown.ToHtml(post.Content);
+                    post.Description = post.Description.MdToHtml();
+                    post.Content = post.Content.MdToHtml();
                 }
                 return post;
             }
@@ -170,8 +180,8 @@ namespace Core.Api
 
                 if (format.ToUpper() == "HTML")
                 {
-                    model.Post.Description = Markdown.ToHtml(model.Post.Description);
-                    model.Post.Content = Markdown.ToHtml(model.Post.Content);
+                    model.Post.Description = model.Post.Description.MdToHtml();
+                    model.Post.Content = model.Post.Content.MdToHtml();
                 }
                 return model;
             }

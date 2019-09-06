@@ -3,7 +3,9 @@ using Core.Data.Models;
 using Core.Helpers;
 using Core.Services;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -112,6 +114,80 @@ namespace Core.Api
                 );
             }
             return Ok();
+        }
+
+        /// <summary>
+        /// Get notifications by type (admins only)
+        /// </summary>
+        /// <param name="type">Notification type, like contact, newsletter etc</param>
+        /// <param name="page">Page number</param>
+        /// <returns>List of notifications</returns>
+        [HttpGet("{type}")]
+        [Administrator]
+        public async Task<NotificationModel> GetNotifications(string type, int page = 1)
+        {
+            var pager = new Pager(page);
+            IEnumerable<Notification> items;
+            AlertType noteType = AlertType.System;
+
+            if (type.ToUpper() == "CONTACT")
+            {
+                noteType = AlertType.Contact;
+                items = await _data.Notifications.GetList(n => n.AlertType == noteType, pager);
+            }
+            else
+            {
+                await _notes.PullSystemNotifications();
+                items = await _data.Notifications.GetList(n => n.AlertType == noteType && n.Active == true, pager);
+                foreach (var item in items)
+                {
+                    item.Content = item.Content.MdToHtml();
+                }
+            }
+
+            if (page < 1 || page > pager.LastPage)
+                return null;
+
+            return new NotificationModel
+            {
+                Notifications = items,
+                Pager = pager
+            };
+        }
+
+        /// <summary>
+        /// Remove notification (admins only)
+        /// </summary>
+        /// <param name="id">Notification ID</param>
+        /// <returns>Ok on success</returns>
+        [Administrator]
+        [HttpDelete("remove/{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var notification = _data.Notifications.Single(n => n.Id == id);
+                if (notification != null)
+                {
+                    if(notification.AlertType == AlertType.System)
+                    {
+                        // system notifications pulled from external sources
+                        // if just remove it, it will be pulled again
+                        // so just mark it as inactive instead
+                        notification.Active = false;
+                    }
+                    else
+                    {
+                        _data.Notifications.Remove(notification);
+                    }
+                    _data.Complete();
+                }
+                return Ok(Resources.Removed);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }
