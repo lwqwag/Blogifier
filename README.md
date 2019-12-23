@@ -2,12 +2,14 @@
 
 Blogifier is multi-user, lightweight blog written in .NET Core with Angular front-end. For programmers, it is easy maintain and extend and for designers, it is simple to customize using familiar tools.
 
+<!--- commented out until azure pipelines work with .net core 3.1
 [![Build Status](https://dev.azure.com/rtur/Blogifier/_apis/build/status/blogifierdotnet.Blogifier)](https://dev.azure.com/rtur/Blogifier/_build/latest?definitionId=3)
+-->
 
 ## System Requirements
 
 * Windows, Mac or Linux
-* ASP.NET Core 2.2
+* ASP.NET Core 3.1
 * Visual Studio 2019, VS Code or other code editor (Atom, Sublime etc)
 * SQLite by default, MS SQL Server, Postgres and MySQL out of the box, EF compatible databases should work
 
