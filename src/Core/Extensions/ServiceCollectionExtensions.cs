@@ -1,16 +1,13 @@
 ﻿using Core.Data;
 using Core.Services;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace Core.Extensions
 {
@@ -42,6 +39,8 @@ namespace Core.Extensions
 
             services.AddTransient<UserManager<AppUser>>();
 
+            AddAppRepositories(services);
+
             return services;
         }
 
@@ -59,6 +58,18 @@ namespace Core.Extensions
                 });
             }
             catch { }
+        }
+
+        private static void AddAppRepositories(IServiceCollection services)
+        {
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
+            services.AddScoped<IHtmlWidgetRepository, HtmlWidgetRepository>();
+            services.AddScoped<INewsletterRepository, NewsletterRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
+            services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
         }
     }
 }
